@@ -42,13 +42,22 @@ def promotion_image():
                     <html lang="en">
                       <head>
                         <meta charset="utf-8">
+                        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" 
+                        rel="stylesheet" 
+                        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" 
+                        crossorigin="anonymous">
                         <title>Колонизация</title>
                       </head>
                       <body>
                         <h1>Жди нас, Марс!</h1>
                         <img src="{url_for('static', filename='img/mars.jpg')}" width="100" height="111"
                          alt="здесь должна была быть картинка, но не нашлась">
-                        <p>Вот она какая, красная планета</p>
+                        <div class="alert alert-dark" role="alert">Человечество вырастает из детства.</div>
+                        <div class="alert alert-success" role="alert">Человечеству мала одна планета.</div>
+                        <div class="alert alert-secondary" role="alert">
+                        Мы сделаем обитаемыми безжизненные пока планеты</div>
+                        <div class="alert alert-warning" role="alert">И начнём с Марса!</div>
+                        <div class="alert alert-danger" role="alert">Присоединяйся!</div>
                       </body>
                     </html>"""
 
