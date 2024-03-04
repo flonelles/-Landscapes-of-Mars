@@ -1,43 +1,74 @@
-from data.users import *
-from flask import Flask
-from data.db_session import *
+from flask_login import LoginManager, login_required, logout_user
+from flask import Flask, render_template, redirect
+from data import db_session
+from data.jobs import Jobs
+from data.users import User
+from forms.login import LoginForm
+from forms.register import RegisterForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
+db_session.global_init('db/mars_explorer.db')
+login_manager = LoginManager()
+login_manager.init_app(app)
 
 
-def main():
-    global_init('db/mars_explorer.db')
-    session = create_session()
-    user2 = User()
-    user2.surname = "Scott"
-    user2.name = "Ridley"
-    user2.age = 21
-    user2.position = "captain"
-    user2.speciality = "research engineer"
-    user2.address = "module_1"
-    user2.email = "scott_chief@mars.org"
-    session.add(user2)
-    user3 = User()
-    user3.surname = "Jim"
-    user3.name = "Carry"
-    user3.age = 20
-    user3.position = "boatswain"
-    user3.speciality = "botanist"
-    user3.address = "module_2"
-    user3.email = "jim_carry@mars.org"
-    session.add(user3)
-    user4 = User()
-    user4.surname = "Jonn"
-    user4.name = "leon"
-    user4.age = 25
-    user4.position = "cook"
-    user4.speciality = "builder"
-    user4.address = "module_3"
-    user4.email = "jonn_leon@mars.org"
-    session.add(user4)
-    session.commit()
+@app.route('/')
+def mission():
+    return 'Миссия Колонизация Марса'
 
 
-if __name__ == '__main__':
-    main()
+@login_manager.user_loader
+def load_user(user_id):
+    db_sess = db_session.create_session()
+    return db_sess.query(User).get(user_id)
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def reqister():
+    form = RegisterForm()
+    if form.validate_on_submit():
+        if form.password.data != form.password_again.data:
+            return render_template('register.html', title='Регистрация',
+                                   form=form,
+                                   message="Пароли не совпадают")
+        db_sess = db_session.create_session()
+        if db_sess.query(User).filter(User.email == form.email.data).first():
+            return render_template('register.html', title='Регистрация',
+                                   form=form,
+                                   message="Такой пользователь уже есть")
+        user = User(
+            name=form.name.data,
+            email=form.email.data,
+            about=form.about.data
+        )
+        user.set_password(form.password.data)
+        db_sess.add(user)
+        db_sess.commit()
+        return redirect('/login')
+    return render_template('register.html', title='Регистрация', form=form)
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        user = db_sess.query(User).filter(User.email == form.email.data).first()
+        if user and user.check_password(form.password.data):
+            load_user(user, remember=form.remember_me.data)
+            return redirect("/")
+        return render_template('login.html',
+                               message="Неправильный логин или пароль",
+                               form=form)
+    return render_template('login.html', title='Авторизация', form=form)
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect("/")
+
+
+app.run(port=8080, host='127.0.0.1')
