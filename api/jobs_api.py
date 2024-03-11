@@ -2,7 +2,7 @@ import flask
 from flask import jsonify
 
 from data import db_session
-from data.news import News
+from data.jobs import Jobs
 
 jobs_blueprint = flask.Blueprint(
     'jobs_api',
@@ -14,7 +14,7 @@ jobs_blueprint = flask.Blueprint(
 @jobs_blueprint.route('/api/jobs')
 def get_jobs():
     db_sess = db_session.create_session()
-    news = db_sess.query(News).all()
+    news = db_sess.query(Jobs).all()
     return jsonify(
         {
             'jobs':
