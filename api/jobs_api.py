@@ -14,11 +14,11 @@ jobs_blueprint = flask.Blueprint(
 @jobs_blueprint.route('/api/jobs')
 def get_jobs():
     db_sess = db_session.create_session()
-    news = db_sess.query(Jobs).all()
+    jobs = db_sess.query(Jobs).all()
     return jsonify(
         {
             'jobs':
-                [item.to_dict(only=('title', 'content', 'user.name'))
-                 for item in news]
+                [item.to_dict(only=('id', 'job'))
+                 for item in jobs]
         }
     )
